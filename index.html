@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบติดตามการส่งแผนการจัดการเรียนรู้และวิจัยในชั้นเรียน - โรงเรียนโสตศึกษาจังหวัดตาก</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Sarabun', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800 flex flex-col">
+
+    <!-- Header Section -->
+    <header class="bg-indigo-900 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-3 text-center md:text-left">
+                    <div class="bg-white p-2 rounded-lg text-indigo-900 shadow hidden sm:block">
+                        <i class="fa-solid fa-graduation-cap text-3xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-bold tracking-tight">ระบบติดตามงานวิชาการ</h1>
+                        <p class="text-indigo-200 text-sm">โรงเรียนโสตศึกษาจังหวัดตาก (ภาคเรียนที่ 2/2569)</p>
+                    </div>
+                </div>
+
+                <!-- Synchronize Sync Button -->
+                <button onclick="refreshData(true)" class="inline-flex items-center space-x-2 bg-indigo-700 hover:bg-indigo-600 text-white font-medium text-xs sm:text-sm px-4 py-2.5 rounded-lg shadow border border-indigo-500/50 transition active:scale-95">
+                    <i id="btn-sync-icon" class="fa-solid fa-rotate mr-1"></i>
+                    <span>ดึงข้อมูลล่าสุด (Sync Data)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- Countdown Banner Section -->
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl shadow-md p-6 mb-6 text-center border border-indigo-900/40">
+            <div class="inline-flex items-center space-x-2 bg-rose-500/20 text-rose-300 text-xs font-semibold px-3 py-1 rounded-full border border-rose-500/30 mb-3">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>กำหนดส่งงาน: 29 พฤศจิกายน 2569 เวลา 23:59 น.</span>
+            </div>
+
+            <h2 class="text-lg sm:text-xl font-bold mb-4 text-slate-100">นับถอยหลังสิ้นสุดการส่งงาน</h2>
+
+            <div id="countdown-timer" class="flex justify-center items-center gap-2 sm:gap-4 mb-6">
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 sm:px-4 sm:py-3 min-w-[65px] sm:min-w-[80px]">
+                    <span id="cd-days" class="block text-2xl sm:text-3xl font-extrabold text-indigo-400">00</span>
+                    <span class="text-[10px] sm:text-xs text-slate-400 font-medium uppercase">วัน</span>
+                </div>
+                <span class="text-2xl font-bold text-slate-500">:</span>
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 sm:px-4 sm:py-3 min-w-[65px] sm:min-w-[80px]">
+                    <span id="cd-hours" class="block text-2xl sm:text-3xl font-extrabold text-indigo-400">00</span>
+                    <span class="text-[10px] sm:text-xs text-slate-400 font-medium uppercase">ชั่วโมง</span>
+                </div>
+                <span class="text-2xl font-bold text-slate-500">:</span>
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 sm:px-4 sm:py-3 min-w-[65px] sm:min-w-[80px]">
+                    <span id="cd-minutes" class="block text-2xl sm:text-3xl font-extrabold text-indigo-400">00</span>
+                    <span class="text-[10px] sm:text-xs text-slate-400 font-medium uppercase">นาที</span>
+                </div>
+                <span class="text-2xl font-bold text-slate-500">:</span>
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl px-3 py-2 sm:px-4 sm:py-3 min-w-[65px] sm:min-w-[80px]">
+                    <span id="cd-seconds" class="block text-2xl sm:text-3xl font-extrabold text-emerald-400">00</span>
+                    <span class="text-[10px] sm:text-xs text-slate-400 font-medium uppercase">วินาที</span>
+                </div>
+            </div>
+
+            <!-- Action Form Submission Buttons Centered Under Countdown -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-xl mx-auto">
+                <a href="https://forms.gle/q4zk4vRL5NsRwAzX9" target="_blank" rel="noopener noreferrer" 
+                   class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-md border border-indigo-400/30 transition transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>ส่งแผนการจัดการเรียนรู้</span>
+                </a>
+                <a href="https://forms.gle/a1V9x4Zkk8vUpRRj7" target="_blank" rel="noopener noreferrer" 
+                   class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-semibold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-md border border-emerald-400/30 transition transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-flask"></i>
+                    <span>ส่งวิจัยในชั้นเรียน</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Loading / Cache Banner Status -->
+        <div id="status-banner" class="hidden mb-4 p-3 rounded-lg text-xs font-medium flex items-center justify-between transition-all">
+            <div id="status-text" class="flex items-center">
+                <!-- Status icon & text injected by JS -->
+            </div>
+            <span id="cache-time" class="text-[11px] opacity-75"></span>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 p-2">
+            <div class="grid grid-cols-2 gap-2">
+                <button id="tab-plan" onclick="switchTab('plan')" class="py-3 px-4 text-center rounded-lg font-medium text-base transition flex items-center justify-center space-x-2 bg-indigo-50 text-indigo-700 font-semibold shadow-sm">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>แผนการจัดการเรียนรู้</span>
+                    <span id="badge-plan-count" class="ml-2 bg-indigo-200 text-indigo-900 text-xs px-2.5 py-0.5 rounded-full font-bold">0</span>
+                </button>
+                <button id="tab-research" onclick="switchTab('research')" class="py-3 px-4 text-center rounded-lg font-medium text-base transition flex items-center justify-center space-x-2 text-slate-600 hover:bg-slate-100">
+                    <i class="fa-solid fa-microscope"></i>
+                    <span>วิจัยในชั้นเรียน</span>
+                    <span id="badge-research-count" class="ml-2 bg-slate-200 text-slate-800 text-xs px-2.5 py-0.5 rounded-full font-bold">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Stats Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                <div class="p-3 bg-indigo-100 text-indigo-600 rounded-lg">
+                    <i class="fa-solid fa-file-circle-check text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 font-medium">รายการที่ส่งทั้งหมด</p>
+                    <p id="stat-total" class="text-2xl font-bold text-slate-800">0</p>
+                </div>
+            </div>
+            
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                <div class="p-3 bg-emerald-100 text-emerald-600 rounded-lg">
+                    <i class="fa-solid fa-user-check text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 font-medium">ครูที่ส่งแล้ว (จาก 46 ท่าน)</p>
+                    <div class="flex items-baseline space-x-1">
+                        <p id="stat-teachers" class="text-2xl font-bold text-slate-800">0</p>
+                        <span id="stat-percent" class="text-xs font-semibold text-emerald-600">(0%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                <div class="p-3 bg-amber-100 text-amber-600 rounded-lg">
+                    <i class="fa-solid fa-clock text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 font-medium">ภาคเรียนปัจจุบัน</p>
+                    <p class="text-lg font-bold text-slate-800">2/2569</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                <div class="p-3 bg-blue-100 text-blue-600 rounded-lg">
+                    <i class="fa-solid fa-file-pdf text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 font-medium">ไฟล์เอกสารแนบ PDF</p>
+                    <p id="stat-files" class="text-2xl font-bold text-slate-800">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-semibold text-slate-800 flex items-center">
+                    <i class="fa-solid fa-filter text-indigo-600 mr-2"></i> ค้นหาและตัวกรองข้อมูล
+                </h3>
+                <button onclick="resetFilters()" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> ล้างตัวกรอง
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Teacher Dropdown -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">ชื่อ - นามสกุล ครูผู้ส่ง</label>
+                    <select id="filter-teacher" onchange="applyFilters()" class="w-full py-2 px-3 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+                        <option value="">-- รายชื่อครูทั้งหมด (46 ท่าน) --</option>
+                    </select>
+                </div>
+
+                <!-- Group Dropdown -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">กลุ่มสาระการเรียนรู้/ฝ่ายงาน</label>
+                    <select id="filter-group" onchange="applyFilters()" class="w-full py-2 px-3 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+                        <option value="">-- กลุ่มสาระทั้งหมด (10 กลุ่ม) --</option>
+                    </select>
+                </div>
+
+                <!-- Student Category Dropdown -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">ประเภทของนักเรียน</label>
+                    <select id="filter-student" onchange="applyFilters()" class="w-full py-2 px-3 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+                        <option value="">-- ทั้งหมด --</option>
+                    </select>
+                </div>
+
+                <!-- Search Input -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">คำค้นหาเพิ่มเติม (วิชา / ชื่อวิจัย)</label>
+                    <div class="relative">
+                        <input type="text" id="filter-search" oninput="applyFilters()" placeholder="พิมพ์คำค้นหา..." class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table Section -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+            <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center space-x-2">
+                    <span id="current-type-title" class="font-bold text-slate-800 text-lg">รายการแผนการจัดการเรียนรู้</span>
+                    <span id="filter-result-count" class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full font-medium">แสดง 0 รายการ</span>
+                </div>
+                <div class="text-xs text-slate-500">
+                    <i class="fa-solid fa-calendar-days mr-1"></i> ภาคเรียนที่ 2/2569
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-600">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-100 border-b border-slate-200">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-center">ลำดับ</th>
+                            <th scope="col" class="px-4 py-3">ประทับเวลา</th>
+                            <th scope="col" class="px-4 py-3">ชื่อ - นามสกุล ครูผู้ส่ง</th>
+                            <th scope="col" class="px-4 py-3">กลุ่มสาระฯ / ฝ่ายงาน</th>
+                            <th scope="col" class="px-4 py-3">ภาคเรียน</th>
+                            <th scope="col" class="px-4 py-3">ประเภทนักเรียน</th>
+                            <th id="th-dynamic" scope="col" class="px-4 py-3">รหัสวิชา / ชื่อรายวิชา / ชั้น</th>
+                            <th scope="col" class="px-4 py-3 text-center">ไฟล์แนบ</th>
+                            <th scope="col" class="px-4 py-3">หมายเหตุ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Table rows populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="empty-state" class="hidden p-8 text-center">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 text-slate-400 mb-3">
+                    <i class="fa-solid fa-inbox text-2xl"></i>
+                </div>
+                <p class="text-slate-600 font-medium">ไม่พบข้อมูลการส่งงานตามเงื่อนไข</p>
+            </div>
+
+            <!-- Loading Spinner State inside table -->
+            <div id="loading-state" class="p-12 text-center">
+                <div class="inline-flex items-center justify-center space-x-2 text-indigo-600 mb-2">
+                    <i class="fa-solid fa-circle-notch fa-spin text-3xl"></i>
+                </div>
+                <p class="text-slate-600 font-medium text-sm">กำลังโหลดข้อมูลจาก Google Sheets...</p>
+                <p class="text-xs text-slate-400 mt-1">โปรดรอสักครู่ ระบบกำลังประมวลผลข้อมูลล่าสุด</p>
+            </div>
+        </div>
+
+        <!-- Teacher Status List Section -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-800 flex items-center">
+                    <i class="fa-solid fa-clipboard-user text-indigo-600 mr-2"></i> สถานะการส่งงานรายบุคคล (ครูทั้งหมด 46 ท่าน)
+                </h3>
+                <div class="flex items-center space-x-3 text-xs">
+                    <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5"></span> ส่งแล้ว</span>
+                    <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-rose-400 mr-1.5"></span> ยังไม่ส่ง</span>
+                </div>
+            </div>
+
+            <div id="teacher-status-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-xs">
+                <!-- Populated dynamically by JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Settings -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                    <i class="fa-solid fa-plug text-indigo-600 mr-2"></i> ตั้งค่าการเชื่อมต่อ Google Sheets
+                </h3>
+                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="py-4 space-y-4">
+                <div class="bg-indigo-50 border border-indigo-100 text-indigo-900 p-3 rounded-lg text-xs leading-relaxed">
+                    <i class="fa-solid fa-circle-info text-indigo-600 mr-1"></i>
+                    เชื่อมต่อข้อมูลจาก Google Sheets ของการตอบกลับแบบฟอร์ม โดยนำลิงก์ <b>.csv (Publish to Web)</b> มาวางในช่องด้านล่าง
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">
+                        URL แผนการจัดการเรียนรู้ (Published CSV):
+                    </label>
+                    <input type="text" id="url-plan" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" class="w-full p-2.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-mono">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">
+                        URL วิจัยในชั้นเรียน (Published CSV):
+                    </label>
+                    <input type="text" id="url-research" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" class="w-full p-2.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-mono">
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex justify-end space-x-2">
+                <button onclick="useMockData()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg font-medium transition">
+                    โหลดข้อมูลตัวอย่าง
+                </button>
+                <button onclick="saveSettings()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded-lg font-medium transition shadow-sm">
+                    บันทึกและดึงข้อมูล
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            © 2026 โรงเรียนโสตศึกษาจังหวัดตาก | ระบบจัดการและสรุปข้อมูลวิชาการออนไลน์ (ภาคเรียนที่ 2/2569)
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // List of 46 Teachers provided
+        const ALL_TEACHERS = [
+            "นางสาวน้ำเพชร คงเพชรศักดิ์", "นางสาวศุภรัตน์ เลิศมโนกุล", "นายอมร เกตุแก้ว", "นางสาววารี นาครัตน์",
+            "นายสุเทพ น้อยทุ่ง", "นายสมศักดิ์ จันทร์บุตร", "นางศศิวิมล สุริยะ", "นางปาริชาติ แก้วคง",
+            "นางสิรีธร บุญสา", "นางอรวรรณ จากสูงเนิน", "นางสาววีรัตน์ชญา วารี", "นางสาวรัตติกาล จันทร์ออน",
+            "นางสาวนภเกตน์ วัฒนโฉมยง", "นางวิจิตรา ดงแสง", "นางสาวปรารถนา แซ่ฮุ้น", "นางสาวจินดาพร จิรวรรธยง",
+            "นางสาวภัคศรัณย์ มีเง้า", "นางเกศริน รอดเขียว", "นางสาวพัชรินทร์ วัฒนโชคกุล", "นางวิภา เจริญกุล",
+            "นางสาวจุฬาลักษณ์ วิทยาวงศ์กุล", "นายธัชชัย สมวัน", "นางสาวรรณรต แก่งศิริ", "นางสาวสุรนารี นาคจีน",
+            "นางสาวภัทรนุช ศิริพงษ์", "นายสุขชัย ปัญญาวรลักษณ์", "นางสาวจุฑาวัลย์ แสนคำอ้าย", "นางสาวสุดา เตสทิ",
+            "นางสาวหนึ่งฤทัย เปรมทอง", "นายโตมร พิทักษ์วัฒนกุล", "นางสาวเมธินาถ ไกรรัตน์", "นางปวรี อิงคง",
+            "นายธนภัทร ลีลา", "นายปฏิภาณ คำรินทร์", "นางสาวพบพร มังคะละ", "นายกิตติพงศ์ อุดโนนตาด",
+            "นางสาวเรณุกา เพิ่มพูล", "นายเชาว์วัฒน์ จิตรกล้า", "นายไตรภพ สำเภา", "นางสาวพชรพรรณ เครือเอม",
+            "นายปรีชา สุขจะนัน", "นางสาวพรประภา เอี่ยมโอน", "นางสาวรินสา วัลลังกา", "นางสาวแสงเดือน สงสนั่น",
+            "นางสาวศิริลักษณ์ ศักดิ์ประพันธ์", "นายอัษฎาวุฒิ แสงมณี"
+        ];
+
+        // Default Google Sheets CSV Export URLs
+        const DEFAULT_PLAN_URL = "https://docs.google.com/spreadsheets/d/1R_VMxZmMLPHzIB2qfoYRjytrf6KIMWE7Bxz6i7_pvhs/export?format=csv";
+        const DEFAULT_RESEARCH_URL = "https://docs.google.com/spreadsheets/d/1Zy8dqD8pywn4FPeN2u6wM70qgKRiWu3SotFH5OFzeuI/export?format=csv";
+
+        // 10 Subject Groups
+        const SUBJECT_GROUPS = [
+            "กลุ่มสาระการเรียนรู้ภาษาไทย",
+            "กลุ่มสาระการเรียนรู้คณิตศาสตร์",
+            "กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี",
+            "กลุ่มสาระการเรียนรู้สังคมศึกษา ศาสนา และวัฒนธรรม",
+            "กลุ่มสาระการเรียนรู้สุขศึกษาและพลศึกษา",
+            "กลุ่มสาระการเรียนรู้ศิลปะ",
+            "กลุ่มสาระการเรียนรู้การงานอาชีพ",
+            "กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ",
+            "ระดับปฐมวัย",
+            "กิจกรรมพัฒนาผู้เรียน"
+        ];
+
+        // 2 Student Types
+        const STUDENT_TYPES = [
+            "นักเรียนที่มีความบกพร่องทางการได้ยิน",
+            "นักเรียนที่มีความบกพร่องทางสติปัญญา"
+        ];
+
+        // Fixed Term
+        const CURRENT_TERM = "ภาคเรียนที่ 2/2569";
+        const CACHE_KEY_PLAN = 'cache_plan_data_v2';
+        const CACHE_KEY_RESEARCH = 'cache_research_data_v2';
+        const CACHE_KEY_TIME = 'cache_time_v2';
+        const CACHE_EXPIRY_MS = 5 * 60 * 1000; // 5 mins cache
+
+        // State Variables
+        let currentTab = 'plan'; 
+        let lessonPlansData = [];
+        let researchDataList = [];
+        let isLoading = false;
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            initFilterDropdowns();
+            loadSavedUrlsAndFetch();
+            startCountdownTimer();
+        });
+
+        // Countdown Timer Logic Target: 29 Nov 2026 23:59:59
+        function startCountdownTimer() {
+            const targetDate = new Date("2026-11-29T23:59:59").getTime();
+
+            function updateTimer() {
+                const now = new Date().getTime();
+                const distance = targetDate - now;
+
+                const daysElem = document.getElementById('cd-days');
+                const hoursElem = document.getElementById('cd-hours');
+                const minsElem = document.getElementById('cd-minutes');
+                const secsElem = document.getElementById('cd-seconds');
+
+                if (!daysElem || !hoursElem || !minsElem || !secsElem) return;
+
+                if (distance < 0) {
+                    daysElem.textContent = "00";
+                    hoursElem.textContent = "00";
+                    minsElem.textContent = "00";
+                    secsElem.textContent = "00";
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                daysElem.textContent = days.toString().padStart(2, '0');
+                hoursElem.textContent = hours.toString().padStart(2, '0');
+                minsElem.textContent = minutes.toString().padStart(2, '0');
+                secsElem.textContent = seconds.toString().padStart(2, '0');
+            }
+
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        function initFilterDropdowns() {
+            const teacherSelect = document.getElementById('filter-teacher');
+            if (teacherSelect) {
+                ALL_TEACHERS.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t;
+                    opt.textContent = t;
+                    teacherSelect.appendChild(opt);
+                });
+            }
+
+            const groupSelect = document.getElementById('filter-group');
+            if (groupSelect) {
+                SUBJECT_GROUPS.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g;
+                    opt.textContent = g;
+                    groupSelect.appendChild(opt);
+                });
+            }
+
+            const studentSelect = document.getElementById('filter-student');
+            if (studentSelect) {
+                STUDENT_TYPES.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s;
+                    opt.textContent = s;
+                    studentSelect.appendChild(opt);
+                });
+            }
+        }
+
+        function switchTab(type) {
+            currentTab = type;
+            const tabPlan = document.getElementById('tab-plan');
+            const tabResearch = document.getElementById('tab-research');
+            const titleElement = document.getElementById('current-type-title');
+            const thDynamic = document.getElementById('th-dynamic');
+
+            if (type === 'plan') {
+                if (tabPlan) tabPlan.className = "py-3 px-4 text-center rounded-lg font-medium text-base transition flex items-center justify-center space-x-2 bg-indigo-50 text-indigo-700 font-semibold shadow-sm";
+                if (tabResearch) tabResearch.className = "py-3 px-4 text-center rounded-lg font-medium text-base transition flex items-center justify-center space-x-2 text-slate-600 hover:bg-slate-100";
+                if (titleElement) titleElement.textContent = "รายการแผนการจัดการเรียนรู้";
+                if (thDynamic) thDynamic.textContent = "รหัสวิชา / ชื่อรายวิชา / ชั้น";
+            } else {
+                if (tabResearch) tabResearch.className = "py-3 px-4 text-center rounded-lg font-medium text-base transition flex items-center justify-center space-x-2 bg-indigo-50 text-indigo-700 font-semibold shadow-sm";
+                if (tabPlan) tabPlan.className = "py-3 px-4 text-center rounded-lg font-medium text-base transition flex items-center justify-center space-x-2 text-slate-600 hover:bg-slate-100";
+                if (titleElement) titleElement.textContent = "รายการวิจัยในชั้นเรียน";
+                if (thDynamic) thDynamic.textContent = "ชื่อวิจัยในชั้นเรียน";
+            }
+
+            renderCurrentView();
+        }
+
+        function renderCurrentView() {
+            const activeData = currentTab === 'plan' ? lessonPlansData : researchDataList;
+            const filteredData = filterDataList(activeData);
+
+            updateDashboardStats(activeData, filteredData);
+            renderTable(filteredData);
+            renderTeacherStatusGrid(activeData);
+        }
+
+        function renderTable(filteredData) {
+            const tbody = document.getElementById('table-body');
+            const emptyState = document.getElementById('empty-state');
+            const loadingState = document.getElementById('loading-state');
+            
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (isLoading) {
+                if (loadingState) loadingState.classList.remove('hidden');
+                if (emptyState) emptyState.classList.add('hidden');
+                return;
+            }
+
+            if (loadingState) loadingState.classList.add('hidden');
+
+            if (filteredData.length === 0) {
+                if (emptyState) emptyState.classList.remove('hidden');
+            } else {
+                if (emptyState) emptyState.classList.add('hidden');
+                
+                const fragment = document.createDocumentFragment();
+                filteredData.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.className = "bg-white border-b hover:bg-slate-50 transition";
+                    
+                    const dynamicContent = currentTab === 'plan' ? item.subject : item.researchTitle;
+
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 text-center text-xs font-semibold text-slate-400">${index + 1}</td>
+                        <td class="px-4 py-3 text-xs whitespace-nowrap text-slate-500">${item.timestamp || '-'}</td>
+                        <td class="px-4 py-3 font-semibold text-slate-900 whitespace-nowrap">${item.teacher || '-'}</td>
+                        <td class="px-4 py-3 text-xs text-slate-600">${item.group || '-'}</td>
+                        <td class="px-4 py-3 text-xs text-slate-600 whitespace-nowrap"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${item.term || CURRENT_TERM}</span></td>
+                        <td class="px-4 py-3 text-xs text-slate-600">${item.studentType || '-'}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-indigo-950">${dynamicContent || '-'}</td>
+                        <td class="px-4 py-3 text-center">
+                            ${item.fileUrl && item.fileUrl !== '-' && item.fileUrl.startsWith('http') ? 
+                                `<a href="${item.fileUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-2.5 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-xs font-medium border border-red-200 transition">
+                                    <i class="fa-solid fa-file-pdf mr-1"></i> เปิดดูไฟล์
+                                 </a>` : 
+                                `<span class="text-xs text-slate-400">ไม่มีไฟล์</span>`
+                            }
+                        </td>
+                        <td class="px-4 py-3 text-xs text-slate-500">${item.note || '-'}</td>
+                    `;
+                    fragment.appendChild(tr);
+                });
+                tbody.appendChild(fragment);
+            }
+        }
+
+        function renderTeacherStatusGrid(activeData) {
+            const grid = document.getElementById('teacher-status-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const submittedTeachers = new Set(activeData.map(d => (d.teacher || '').trim()));
+            const fragment = document.createDocumentFragment();
+
+            ALL_TEACHERS.forEach(teacher => {
+                const hasSubmitted = submittedTeachers.has(teacher.trim());
+                const item = document.createElement('div');
+                item.className = `p-2.5 rounded-lg border flex items-center justify-between ${
+                    hasSubmitted ? 'bg-emerald-50/60 border-emerald-200 text-emerald-950' : 'bg-slate-50 border-slate-200 text-slate-500'
+                }`;
+
+                item.innerHTML = `
+                    <span class="font-medium truncate mr-2" title="${teacher}">${teacher}</span>
+                    ${hasSubmitted 
+                        ? `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold flex items-center whitespace-nowrap"><i class="fa-solid fa-check mr-1"></i> ส่งแล้ว</span>`
+                        : `<span class="px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-[10px] font-medium whitespace-nowrap">ยังไม่ส่ง</span>`
+                    }
+                `;
+                fragment.appendChild(item);
+            });
+            grid.appendChild(fragment);
+        }
+
+        function filterDataList(data) {
+            const searchElem = document.getElementById('filter-search');
+            const teacherElem = document.getElementById('filter-teacher');
+            const groupElem = document.getElementById('filter-group');
+            const studentElem = document.getElementById('filter-student');
+
+            const searchValue = searchElem ? searchElem.value.toLowerCase().trim() : '';
+            const teacherValue = teacherElem ? teacherElem.value : '';
+            const groupValue = groupElem ? groupElem.value : '';
+            const studentValue = studentElem ? studentElem.value : '';
+
+            return data.filter(item => {
+                const searchMatch = !searchValue || 
+                    (item.subject && item.subject.toLowerCase().includes(searchValue)) ||
+                    (item.researchTitle && item.researchTitle.toLowerCase().includes(searchValue));
+
+                const teacherMatch = !teacherValue || (item.teacher && item.teacher.trim() === teacherValue.trim());
+                const groupMatch = !groupValue || (item.group && item.group.trim() === groupValue.trim());
+                const studentMatch = !studentValue || (item.studentType && item.studentType.trim() === studentValue.trim());
+
+                return searchMatch && teacherMatch && groupMatch && studentMatch;
+            });
+        }
+
+        function applyFilters() { renderCurrentView(); }
+
+        function resetFilters() {
+            const searchElem = document.getElementById('filter-search');
+            const teacherElem = document.getElementById('filter-teacher');
+            const groupElem = document.getElementById('filter-group');
+            const studentElem = document.getElementById('filter-student');
+
+            if (searchElem) searchElem.value = '';
+            if (teacherElem) teacherElem.value = '';
+            if (groupElem) groupElem.value = '';
+            if (studentElem) studentElem.value = '';
+            renderCurrentView();
+        }
+
+        function updateDashboardStats(allData, filteredData) {
+            const countElem = document.getElementById('filter-result-count');
+            const totalElem = document.getElementById('stat-total');
+            const teachersElem = document.getElementById('stat-teachers');
+            const percentElem = document.getElementById('stat-percent');
+            const filesElem = document.getElementById('stat-files');
+
+            if (countElem) countElem.textContent = `แสดง ${filteredData.length} รายการ`;
+            if (totalElem) totalElem.textContent = allData.length;
+            
+            const uniqueTeachersSubmitted = new Set(
+                allData.map(d => (d.teacher || '').trim()).filter(t => ALL_TEACHERS.includes(t))
+            ).size;
+            const percentage = Math.round((uniqueTeachersSubmitted / ALL_TEACHERS.length) * 100);
+
+            if (teachersElem) teachersElem.textContent = `${uniqueTeachersSubmitted}`;
+            if (percentElem) percentElem.textContent = `(${percentage}%)`;
+
+            const filesCount = allData.filter(d => d.fileUrl && d.fileUrl !== '-' && d.fileUrl.startsWith('http')).length;
+            if (filesElem) filesElem.textContent = filesCount;
+        }
+
+        function updateCounts() {
+            const planBadge = document.getElementById('badge-plan-count');
+            const researchBadge = document.getElementById('badge-research-count');
+            if (planBadge) planBadge.textContent = lessonPlansData.length;
+            if (researchBadge) researchBadge.textContent = researchDataList.length;
+        }
+
+        function toggleSettingsModal() {
+            const modal = document.getElementById('settings-modal');
+            if (modal) modal.classList.toggle('hidden');
+        }
+
+        function saveSettings() {
+            const planUrlElem = document.getElementById('url-plan');
+            const researchUrlElem = document.getElementById('url-research');
+
+            const planUrl = (planUrlElem && planUrlElem.value.trim()) || DEFAULT_PLAN_URL;
+            const researchUrl = (researchUrlElem && researchUrlElem.value.trim()) || DEFAULT_RESEARCH_URL;
+
+            localStorage.setItem('url_plan_2569', planUrl);
+            localStorage.setItem('url_research_2569', researchUrl);
+
+            refreshData(true);
+            toggleSettingsModal();
+        }
+
+        function loadSavedUrlsAndFetch() {
+            const planUrl = localStorage.getItem('url_plan_2569') || DEFAULT_PLAN_URL;
+            const researchUrl = localStorage.getItem('url_research_2569') || DEFAULT_RESEARCH_URL;
+
+            const planInput = document.getElementById('url-plan');
+            const researchInput = document.getElementById('url-research');
+            if (planInput) planInput.value = planUrl;
+            if (researchInput) researchInput.value = researchUrl;
+
+            // Try loading from local cache first for fast initial load
+            const cachedPlan = localStorage.getItem(CACHE_KEY_PLAN);
+            const cachedResearch = localStorage.getItem(CACHE_KEY_RESEARCH);
+            const cachedTime = localStorage.getItem(CACHE_KEY_TIME);
+
+            if (cachedPlan && cachedResearch && cachedTime) {
+                try {
+                    lessonPlansData = JSON.parse(cachedPlan);
+                    researchDataList = JSON.parse(cachedResearch);
+                    updateCounts();
+                    renderCurrentView();
+                    showStatusBanner('cache', new Date(parseInt(cachedTime)).toLocaleTimeString('th-TH'));
+
+                    // If cache is expired, background refresh
+                    if (Date.now() - parseInt(cachedTime) > CACHE_EXPIRY_MS) {
+                        refreshData(false);
+                    }
+                    return;
+                } catch(e) {
+                    console.error("Error parsing cache", e);
+                }
+            }
+
+            refreshData(true);
+        }
+
+        async function refreshData(showLoading = true) {
+            const planUrl = localStorage.getItem('url_plan_2569') || DEFAULT_PLAN_URL;
+            const researchUrl = localStorage.getItem('url_research_2569') || DEFAULT_RESEARCH_URL;
+
+            const refreshIcon = document.getElementById('btn-sync-icon');
+
+            if (showLoading) {
+                isLoading = true;
+                if (refreshIcon) refreshIcon.classList.add('fa-spin');
+                renderCurrentView();
+            }
+
+            showStatusBanner('loading');
+
+            try {
+                const [planRes, researchRes] = await Promise.all([
+                    fetchCSVData(planUrl),
+                    fetchCSVData(researchUrl)
+                ]);
+
+                lessonPlansData = parseCSVFast(planRes, 'plan');
+                researchDataList = parseCSVFast(researchRes, 'research');
+
+                // Update Cache
+                const now = Date.now();
+                localStorage.setItem(CACHE_KEY_PLAN, JSON.stringify(lessonPlansData));
+                localStorage.setItem(CACHE_KEY_RESEARCH, JSON.stringify(researchDataList));
+                localStorage.setItem(CACHE_KEY_TIME, now.toString());
+
+                updateCounts();
+                showStatusBanner('success', new Date(now).toLocaleTimeString('th-TH'));
+            } catch (error) {
+                console.error("Error loading CSV:", error);
+                showStatusBanner('error');
+            } finally {
+                isLoading = false;
+                if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+                renderCurrentView();
+            }
+        }
+
+        async function fetchCSVData(url) {
+            const cacheBustUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+            const response = await fetch(cacheBustUrl, { cache: 'no-store' });
+            if (!response.ok) throw new Error('Network error');
+            return await response.text();
+        }
+
+        function showStatusBanner(state, timeStr = '') {
+            const banner = document.getElementById('status-banner');
+            const text = document.getElementById('status-text');
+            const cacheTime = document.getElementById('cache-time');
+            if (!banner || !text || !cacheTime) return;
+
+            banner.classList.remove('hidden', 'bg-amber-50', 'text-amber-800', 'border-amber-200', 'bg-emerald-50', 'text-emerald-800', 'border-emerald-200', 'bg-rose-50', 'text-rose-800', 'border-rose-200');
+
+            if (state === 'loading') {
+                banner.classList.add('bg-amber-50', 'text-amber-800', 'border', 'border-amber-200');
+                text.innerHTML = `<i class="fa-solid fa-sync fa-spin mr-2 text-amber-600"></i> กำลังเชื่อมต่อและอัปเดตข้อมูลล่าสุดจาก Google Sheets...`;
+                cacheTime.textContent = '';
+            } else if (state === 'cache' || state === 'success') {
+                banner.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
+                text.innerHTML = `<i class="fa-solid fa-circle-check mr-2 text-emerald-600"></i> ข้อมูลเรียลไทม์สมบูรณ์ (อัปเดตล่าสุด: ${timeStr} น.)`;
+                cacheTime.textContent = '';
+            } else if (state === 'error') {
+                banner.classList.add('bg-rose-50', 'text-rose-800', 'border', 'border-rose-200');
+                text.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-2 text-rose-600"></i> ไม่สามารถเชื่อมต่อ Google Sheets ได้ ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต`;
+                cacheTime.textContent = '';
+            }
+        }
+
+        // Fast & Efficient CSV Parser
+        function parseCSVFast(text, type) {
+            if (!text || text.trim().length === 0) return [];
+
+            const lines = text.split(/\r\n|\n/);
+            const result = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                // Split line handling quotes
+                const cols = line.match(/(?:[^\",]+|\"[^\"]*\")+/g) || line.split(',');
+                const cleanCols = cols.map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+
+                if (cleanCols.length >= 6) {
+                    if (type === 'plan') {
+                        result.push({
+                            timestamp: cleanCols[0] || '',
+                            teacher: cleanCols[1] || '',
+                            group: cleanCols[2] || '',
+                            term: cleanCols[3] || CURRENT_TERM,
+                            studentType: cleanCols[4] || '',
+                            subject: cleanCols[5] || '',
+                            fileUrl: cleanCols[6] || '',
+                            note: cleanCols[7] || '-'
+                        });
+                    } else {
+                        result.push({
+                            timestamp: cleanCols[0] || '',
+                            teacher: cleanCols[1] || '',
+                            group: cleanCols[2] || '',
+                            term: cleanCols[3] || CURRENT_TERM,
+                            studentType: cleanCols[4] || '',
+                            researchTitle: cleanCols[5] || '',
+                            fileUrl: cleanCols[6] || '',
+                            note: cleanCols[7] || '-'
+                        });
+                    }
+                }
+            }
+            return result;
+        }
+    </script>
+</body>
+</html>
